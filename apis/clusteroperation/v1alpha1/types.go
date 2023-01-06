@@ -1,8 +1,8 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"kubean.io/api/apis"
 )
 
@@ -63,6 +63,10 @@ type Spec struct {
 	PreHook []HookAction `json:"preHook"`
 	// +optional
 	PostHook []HookAction `json:"postHook"`
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources"`
+	// +optional
+	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds"`
 }
 
 type HookAction struct {
