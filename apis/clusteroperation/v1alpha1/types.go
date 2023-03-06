@@ -25,11 +25,19 @@ type ClusterOperation struct {
 	Status Status `json:"status,omitempty"`
 }
 
-type ActionType string
+type (
+	ActionSource string
+	ActionType   string
+)
 
 const (
 	PlaybookActionType ActionType = "playbook"
 	ShellActionType    ActionType = "shell"
+)
+
+const (
+	BuiltinActionSource   ActionSource = "builtin"
+	ConfigMapActionSource ActionSource = "configmap"
 )
 
 // Spec defines the desired state of a member cluster.
@@ -42,17 +50,22 @@ type Spec struct {
 	HostsConfRef *apis.ConfigMapRef `json:"hostsConfRef"`
 	// VarsConfRef will be filled by operator when it performs backup.
 	// +optional
-	VarsConfRef *apis.ConfigMapRef `json:"varsConfRef"`
+	VarsConfRef *apis.ConfigMapRef `json:"varsConfRef,omitempty"`
 	// SSHAuthRef will be filled by operator when it performs backup.
 	// +optional
-	SSHAuthRef *apis.SecretRef `json:"sshAuthRef"`
+	SSHAuthRef *apis.SecretRef `json:"sshAuthRef,omitempty"`
 	// +optional
 	// EntrypointSHRef will be filled by operator when it renders entrypoint.sh.
-	EntrypointSHRef *apis.ConfigMapRef `json:"entrypointSHRef"`
+	EntrypointSHRef *apis.ConfigMapRef `json:"entrypointSHRef,omitempty"`
 	// +required
 	ActionType ActionType `json:"actionType"`
 	// +required
 	Action string `json:"action"`
+	// +optional
+	// +kubebuilder:default="builtin"
+	ActionSource ActionSource `json:"actionSource"`
+	// +optional
+	ActionSourceRef *apis.ConfigMapRef `json:"actionSourceRef"`
 	// +optional
 	ExtraArgs string `json:"extraArgs"`
 	// +required
@@ -66,7 +79,7 @@ type Spec struct {
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources"`
 	// +optional
-	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds"`
+	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds,omitempty"`
 }
 
 type HookAction struct {
@@ -74,6 +87,11 @@ type HookAction struct {
 	ActionType ActionType `json:"actionType"`
 	// +required
 	Action string `json:"action"`
+	// +optional
+	// +kubebuilder:default="builtin"
+	ActionSource ActionSource `json:"actionSource"`
+	// +optional
+	ActionSourceRef *apis.ConfigMapRef `json:"actionSourceRef"`
 	// +optional
 	ExtraArgs string `json:"extraArgs"`
 }
@@ -93,13 +111,13 @@ type Status struct {
 	// +optional
 	Action string `json:"action"`
 	// +optional
-	JobRef *apis.JobRef `json:"jobRef"`
+	JobRef *apis.JobRef `json:"jobRef,omitempty"`
 	// +optional
 	Status OpsStatus `json:"status"`
 	// +optional
-	StartTime *metav1.Time `json:"startTime"`
+	StartTime *metav1.Time `json:"startTime,omitempty"`
 	// +optional
-	EndTime *metav1.Time `json:"endTime"`
+	EndTime *metav1.Time `json:"endTime,omitempty"`
 	// Digest is used to avoid the change of clusterOps by others. it will be filled by operator. Do Not change this value.
 	// +optional
 	Digest string `json:"digest,omitempty"`
